@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "uuid",
+  "version": "${version}",
+  "name": "UUID",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/uuid/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "bhw.bihrys.uuid.client.UuidDataGenerator"
+    ],
+    "client": [
+      "bhw.bihrys.uuid.client.UuidClient"
+    ],
+    "main": [
+      "bhw.bihrys.uuid.Uuid"
+    ]
+  },
+  "mixins": [
+    "uuid.mixins.json",
+    {
+      "config": "uuid.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
