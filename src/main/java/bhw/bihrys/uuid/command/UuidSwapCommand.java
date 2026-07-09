@@ -1,78 +1,103 @@
 package bhw.bihrys.uuid.command;
 
-import bhw.bihrys.uuid.Uuid;
 import bhw.bihrys.uuid.config.UuidConfig;
+import bhw.bihrys.uuid.gui.PlayerSelectionGui;
 import bhw.bihrys.uuid.player.PlayerDataManager;
+import bhw.bihrys.uuid.player.PlayerInfo;
+import bhw.bihrys.uuid.util.PermissionUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.argument.UuidArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
+import java.util.List;
 import java.util.UUID;
 
-public class UuidSwapCommand {
+public final class UuidSwapCommand {
+    private UuidSwapCommand() {
+    }
 
-	public static void register() {
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(
-				CommandManager.literal("uuidswap")
-					.requires(UuidSwapCommand::hasPermission)
-					.executes(ctx -> listPlayers(ctx.getSource()))
-					.then(
-						CommandManager.argument("targetUuid", UuidArgumentType.uuid())
-							.executes(ctx -> swapToPlayer(ctx.getSource(), UuidArgumentType.getUuid(ctx, "targetUuid")))
-					)
-			);
-		});
-	}
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+        dispatcher.register(CommandManager.literal("uuidswap")
+                .requires(source -> PermissionUtil.has(source, UuidConfig.INSTANCE.playerSwapPermissionLevel))
+                .executes(context -> openSelfSwapGui(context.getSource()))
+                .then(CommandManager.literal("list")
+                        .executes(context -> listPlayers(context.getSource())))
+                .then(CommandManager.literal("apply")
+                        .then(CommandManager.argument("sourceUuid", UuidArgumentType.uuid())
+                                .then(CommandManager.argument("targetUuid", UuidArgumentType.uuid())
+                                        .executes(context -> applySwap(
+                                                context.getSource(),
+                                                UuidArgumentType.getUuid(context, "sourceUuid"),
+                                                UuidArgumentType.getUuid(context, "targetUuid")
+                                        )))))
+                .then(CommandManager.argument("targetUuid", UuidArgumentType.uuid())
+                        .executes(context -> swapSelfToTarget(context.getSource(), UuidArgumentType.getUuid(context, "targetUuid")))));
+    }
 
-	private static boolean hasPermission(ServerCommandSource source) {
-		int requiredLevel = UuidConfig.REQUIRED_PERMISSION_LEVEL;
+    private static int openSelfSwapGui(ServerCommandSource source) throws CommandSyntaxException {
+        ServerPlayerEntity player = source.getPlayerOrThrow();
+        List<PlayerInfo> players = PlayerDataManager.getAllPlayers(source.getServer());
+        PlayerSelectionGui.open(player, players, Text.literal("选择要复制的数据来源"), selected -> {
+            PlayerDataManager.SwapResult result = PlayerDataManager.requestSwap(
+                    source.getServer(),
+                    player.getUuid(),
+                    selected.uuid(),
+                    source.getName()
+            );
+            player.sendMessage(formatResult(result), false);
+        });
+        return Command.SINGLE_SUCCESS;
+    }
 
-		// Check if entity is a player with op status
-		if (source.getEntity() instanceof ServerPlayerEntity player) {
-			var permLevel = source.getServer().getPermissionLevel(player.getGameProfile());
-			return permLevel >= requiredLevel;
-		}
+    private static int listPlayers(ServerCommandSource source) {
+        List<PlayerInfo> players = PlayerDataManager.getAllPlayers(source.getServer());
+        source.sendFeedback(() -> Text.literal("=== UUID Swap 玩家列表 ===").formatted(Formatting.GOLD), false);
+        for (PlayerInfo info : players) {
+            source.sendFeedback(() -> Text.literal((info.online() ? "[在线] " : "[离线] ") + info.name() + "  " + info.uuid())
+                    .formatted(info.online() ? Formatting.GREEN : Formatting.YELLOW), false);
+        }
+        source.sendFeedback(() -> Text.literal("玩家自用: /uuidswap <targetUuid>；控制台/OP指定: /uuidswap apply <sourceUuid> <targetUuid>").formatted(Formatting.GRAY), false);
+        return players.size();
+    }
 
-		// Console always has permission
-		return source.getEntity() == null;
-	}
+    private static int swapSelfToTarget(ServerCommandSource source, UUID targetUuid) throws CommandSyntaxException {
+        ServerPlayerEntity player = source.getPlayerOrThrow();
+        PlayerDataManager.SwapResult result = PlayerDataManager.requestSwap(
+                source.getServer(),
+                player.getUuid(),
+                targetUuid,
+                source.getName()
+        );
+        sendResult(source, result);
+        return result.success() ? Command.SINGLE_SUCCESS : 0;
+    }
 
-	private static int listPlayers(ServerCommandSource source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-		ServerPlayerEntity player = source.getPlayerOrThrow();
+    private static int applySwap(ServerCommandSource source, UUID sourceUuid, UUID targetUuid) {
+        PlayerDataManager.SwapResult result = PlayerDataManager.requestSwap(
+                source.getServer(),
+                sourceUuid,
+                targetUuid,
+                source.getName()
+        );
+        sendResult(source, result);
+        return result.success() ? Command.SINGLE_SUCCESS : 0;
+    }
 
-		// Get all players
-		var allPlayers = PlayerDataManager.getAllPlayers(source.getServer());
+    private static void sendResult(ServerCommandSource source, PlayerDataManager.SwapResult result) {
+        if (result.success()) {
+            source.sendFeedback(() -> Text.literal(result.message()).formatted(Formatting.GREEN), true);
+        } else {
+            source.sendError(Text.literal(result.message()).formatted(Formatting.RED));
+        }
+    }
 
-		// Send feedback
-		source.sendFeedback(() -> Text.literal("§6=== Available Players ==="), false);
-		for (var info : allPlayers) {
-			source.sendFeedback(() -> Text.literal(String.format("  §e%s §7(%s)", info.name, info.uuid)), false);
-		}
-
-		source.sendFeedback(() -> Text.literal("§6Use: /uuidswap <uuid>"), false);
-
-		return Command.SINGLE_SUCCESS;
-	}
-
-	private static int swapToPlayer(ServerCommandSource source, UUID targetUuid) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-		ServerPlayerEntity player = source.getPlayerOrThrow();
-
-		// Prevent swapping to same UUID
-		if (player.getUuid().equals(targetUuid)) {
-			source.sendError(Text.literal("§cYou cannot swap to your own UUID!"));
-			return 0;
-		}
-
-		// Perform the swap
-		PlayerDataManager.swapPlayerData(player, targetUuid, source.getServer());
-		source.sendFeedback(() -> Text.literal("§aPlayer data swap completed!"), true);
-
-		return Command.SINGLE_SUCCESS;
-	}
+    private static Text formatResult(PlayerDataManager.SwapResult result) {
+        return Text.literal(result.message()).formatted(result.success() ? Formatting.GREEN : Formatting.RED);
+    }
 }

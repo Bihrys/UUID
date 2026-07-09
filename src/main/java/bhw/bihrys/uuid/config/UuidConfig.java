@@ -3,60 +3,71 @@ package bhw.bihrys.uuid.config;
 import bhw.bihrys.uuid.Uuid;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class UuidConfig {
-	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-	private static final Path CONFIG_PATH = Paths.get("config", "uuid-config.json");
+public final class UuidConfig {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Path CONFIG_PATH = Paths.get("config", "uuid-config.json");
 
-	public static int playerSwapPermissionLevel = 3; // Default: OPs
-	public static boolean transferPetsAutomatically = true;
-	public static boolean enablePetOwnerSwap = true;
+    public static UuidConfig INSTANCE = new UuidConfig();
 
-	public static void load() {
-		try {
-			File configFile = CONFIG_PATH.toFile();
-			if (configFile.exists()) {
-				try (FileReader reader = new FileReader(configFile)) {
-					JsonObject json = GSON.fromJson(reader, JsonObject.class);
-					playerSwapPermissionLevel = json.has("playerSwapPermissionLevel") ?
-						json.get("playerSwapPermissionLevel").getAsInt() : 3;
-					transferPetsAutomatically = json.has("transferPetsAutomatically") ?
-						json.get("transferPetsAutomatically").getAsBoolean() : true;
-					enablePetOwnerSwap = json.has("enablePetOwnerSwap") ?
-						json.get("enablePetOwnerSwap").getAsBoolean() : true;
-				}
-				Uuid.LOGGER.info("Loaded UUID config from {}", CONFIG_PATH);
-			} else {
-				save();
-				Uuid.LOGGER.info("Created default UUID config at {}", CONFIG_PATH);
-			}
-		} catch (IOException e) {
-			Uuid.LOGGER.error("Failed to load UUID config", e);
-		}
-	}
+    /**
+     * Minecraft 1.21.11 permission levels:
+     * 0 = everyone, 1 = moderators, 2 = gamemasters, 3 = admins, 4 = owners/full OP.
+     */
+    public int playerSwapPermissionLevel = 4;
+    public int petOwnerSwapPermissionLevel = 4;
 
-	public static void save() {
-		try {
-			Files.createDirectories(CONFIG_PATH.getParent());
-			JsonObject json = new JsonObject();
-			json.addProperty("playerSwapPermissionLevel", playerSwapPermissionLevel);
-			json.addProperty("transferPetsAutomatically", transferPetsAutomatically);
-			json.addProperty("enablePetOwnerSwap", enablePetOwnerSwap);
+    public boolean backupBeforeOverwrite = true;
+    public boolean transferPetsAutomatically = true;
+    public boolean enablePetOwnerSwap = true;
 
-			try (FileWriter writer = new FileWriter(CONFIG_PATH.toFile())) {
-				GSON.toJson(json, writer);
-			}
-		} catch (IOException e) {
-			Uuid.LOGGER.error("Failed to save UUID config", e);
-		}
-	}
+    private UuidConfig() {
+    }
+
+    public static void load() {
+        try {
+            if (Files.exists(CONFIG_PATH)) {
+                try (Reader reader = Files.newBufferedReader(CONFIG_PATH)) {
+                    UuidConfig loaded = GSON.fromJson(reader, UuidConfig.class);
+                    INSTANCE = loaded == null ? new UuidConfig() : loaded;
+                }
+                sanitize();
+                save();
+                Uuid.LOGGER.info("Loaded config from {}", CONFIG_PATH);
+            } else {
+                INSTANCE = new UuidConfig();
+                save();
+                Uuid.LOGGER.info("Created default config at {}", CONFIG_PATH);
+            }
+        } catch (Exception e) {
+            Uuid.LOGGER.error("Failed to load config. Falling back to defaults.", e);
+            INSTANCE = new UuidConfig();
+        }
+    }
+
+    public static void save() {
+        try {
+            Files.createDirectories(CONFIG_PATH.getParent());
+            try (Writer writer = Files.newBufferedWriter(CONFIG_PATH)) {
+                GSON.toJson(INSTANCE, writer);
+            }
+        } catch (Exception e) {
+            Uuid.LOGGER.error("Failed to save config", e);
+        }
+    }
+
+    private static void sanitize() {
+        INSTANCE.playerSwapPermissionLevel = clampPermission(INSTANCE.playerSwapPermissionLevel);
+        INSTANCE.petOwnerSwapPermissionLevel = clampPermission(INSTANCE.petOwnerSwapPermissionLevel);
+    }
+
+    private static int clampPermission(int value) {
+        return Math.max(0, Math.min(4, value));
+    }
 }

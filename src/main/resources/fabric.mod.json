@@ -2,12 +2,13 @@
   "schemaVersion": 1,
   "id": "uuid",
   "version": "${version}",
-  "name": "UUID",
-  "description": "",
-  "authors": [],
+  "name": "UUID Swap",
+  "description": "Swap Minecraft player save data by UUID and reassign tameable pet ownership from an in-game player-head GUI.",
+  "authors": [
+    "Bihrys"
+  ],
   "contact": {},
   "license": "All-Rights-Reserved",
-  "icon": "assets/uuid/icon.png",
   "environment": "*",
   "entrypoints": {
     "fabric-datagen": [
@@ -30,6 +31,7 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": "${minecraft_version}",
+    "java": ">=21"
   }
 }
