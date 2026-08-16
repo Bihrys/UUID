@@ -1,0 +1,60 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+}
+
+def minecraftVersion = '26.1'
+def loaderVersion = '0.19.3'
+def fabricApiVersion = '0.145.1+26.1'
+
+version = "1.0.0+${minecraftVersion}"
+
+base {
+    archivesName = "uuid-fabric-${minecraftVersion}"
+}
+
+sourceSets.main.java.srcDir project(':common').file('src/main/java')
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        uuid {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    implementation "net.fabricmc:fabric-loader:${loaderVersion}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft_version', minecraftVersion
+    inputs.property 'loader_version', loaderVersion
+
+    filesMatching('fabric.mod.json') {
+        expand version: project.version,
+                minecraft_version: minecraftVersion,
+                loader_version: loaderVersion
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+
+jar {
+    from(rootProject.file('LICENSE.txt')) {
+        rename { "${it}_uuid" }
+    }
+}

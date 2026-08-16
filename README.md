@@ -1,131 +1,78 @@
 # UUID Swap
 
-Fabric 1.21.11 模组。功能是按 UUID 复制/替换玩家存档数据，并提供宠物主人替换功能。
+**English** | [简体中文](README_zh-CN.md)
 
-## 基本信息
+[![Build all Minecraft versions](https://github.com/Bihrys/UUID/actions/workflows/build.yml/badge.svg)](https://github.com/Bihrys/UUID/actions/workflows/build.yml)
 
-- Minecraft: `1.21.11`
-- Loader: Fabric Loader `0.19.3`
-- Yarn: `1.21.11+build.6`
-- Fabric API: `0.141.4+1.21.11`
-- Java: `21`
-- Mod ID: `uuid`
+UUID Swap is a Fabric mod that replaces Minecraft player save data by UUID and provides an in-game GUI for transferring ownership of tamed pets.
 
-## 功能
+## Compatibility
 
-### 1. 玩家数据替换
+| Minecraft | Java | Module |
+|---|---:|---|
+| `1.21.11` | 21+ | `fabric-1.21.11` |
+| `26.1` | 25+ | `fabric-26.1` |
+| `26.1.1` | 25+ | `fabric-26.1.1` |
+| `26.1.2` | 25+ | `fabric-26.1.2` |
+| `26.2` | 25+ | `fabric-26.2` |
 
-玩家或管理员可以选择一个已有玩家的数据来源，把另一个玩家的保存数据替换成该数据来源。
+All builds use Fabric Loader `0.19.3` or newer and Mod ID `uuid`. Minecraft 26.x uses the new unobfuscated development setup.
 
-替换范围包括：
+## Features
 
-- `playerdata/<uuid>.dat`
-  - 背包
-  - 经验
-  - 血量
-  - 位置
-  - 维度
-  - 末影箱等保存在玩家 `.dat` 文件中的数据
-- `stats/<uuid>.json`
-  - 游戏时间
-  - 统计信息
-- `advancements/<uuid>.json`
-  - 成就/进度
+### Player data replacement
 
-如果配置项 `transferPetsAutomatically=true`，模组还会把当前已加载区块中的已驯服宠物主人从目标玩家 UUID 改为源玩家 UUID。
+The mod can copy a donor player's saved data to a target UUID. The following files are handled:
 
-> 注意：Minecraft 没有在运行时一次性枚举全世界所有未加载区块实体的安全公共 API。本模组自动转移的是当前服务器已加载世界中的 `TameableEntity`。未加载区块里的宠物需要加载区块后再用红石粉右键功能单独处理，或者让区块加载后再次执行替换。
+- `playerdata/<uuid>.dat` — inventory, experience, health, position, dimension, ender chest, and other player data
+- `stats/<uuid>.json` — statistics
+- `advancements/<uuid>.json` — advancements
 
-### 2. 玩家选择 GUI
+When `transferPetsAutomatically=true`, loaded tamed animals owned by the donor are reassigned to the target UUID.
 
-输入 `/uuidswap` 后会打开箱子 GUI：
+> Only entities in currently loaded worlds can be transferred automatically. Pets in unloaded chunks must be handled after their chunks are loaded.
 
-- 每个玩家显示为玩家头颅。
-- 头颅显示玩家皮肤头像。
-- 名称显示玩家名。
-- Lore 显示 UUID 和在线/离线状态。
-- 支持分页。
-- 点击头像即可选择该玩家作为数据来源。
+### Player selection GUI
 
-这样可以满足“列出全部玩家 UUID 和名字，并点击选择”的需求，同时不要求客户端安装额外 UI 模组。
+Running `/uuidswap` opens a paginated chest GUI. Each player is shown as a player head with their name, UUID, skin, and online/offline status.
 
-### 3. 宠物主人替换
+### Pet owner replacement
 
-操作方式：
+Hold redstone dust, sneak, and right-click a tamed animal. Select the new owner from the player-head GUI.
 
-1. 手持红石粉。
-2. 潜行/蹲下。
-3. 右键一个已驯服宠物。
-4. 打开玩家选择 GUI。
-5. 点击玩家头像，把宠物主人替换为该玩家。
+## Commands
 
-适用对象：所有继承 `TameableEntity` 的驯服型实体，例如狼、猫、鹦鹉等。
-
-## 指令
-
-### 打开玩家选择界面
-
-```mcfunction
+```text
 /uuidswap
 ```
 
-仅玩家可用。打开 GUI，点击目标玩家后，会把自己的数据替换为该目标玩家的数据。
+Open the GUI and replace your own data with the selected player's data.
 
-### 列出已有玩家
-
-```mcfunction
+```text
 /uuidswap list
 ```
 
-显示服务器/存档中已有玩家的名字、UUID、在线状态。
+List known players, UUIDs, and online status.
 
-### 玩家把自己替换成指定 UUID 的数据
-
-```mcfunction
+```text
 /uuidswap <targetUuid>
 ```
 
-示例：
+Replace your own data with the data stored under `targetUuid`.
 
-```mcfunction
-/uuidswap 00000000-0000-0000-0000-000000000000
-```
-
-### OP 或控制台指定替换
-
-```mcfunction
+```text
 /uuidswap apply <sourceUuid> <targetUuid>
 ```
 
-含义：把 `sourceUuid` 对应玩家的数据替换成 `targetUuid` 对应玩家的数据。
+Replace the data stored under `sourceUuid` with the data stored under `targetUuid`. This form is intended for operators and the server console.
 
-示例：
+## Online replacement behavior
 
-```mcfunction
-/uuidswap apply aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
-```
+If the source player is online, the mod disconnects them first, waits for the final save, and applies the replacement on the next server tick. The player can then reconnect and load the new data.
 
-## 在线玩家替换逻辑
+## Configuration
 
-如果 `sourceUuid` 对应玩家在线，模组不会直接热替换。流程如下：
-
-1. 记录待替换任务。
-2. 踢出该玩家。
-3. 等服务器完成断开连接后的最终保存。
-4. 下一 tick 替换文件。
-5. 玩家重新进入世界后加载新数据。
-
-这样做是为了避免 Minecraft 在玩家离线保存时把刚替换的数据覆盖掉。
-
-## 配置文件
-
-第一次启动后生成：
-
-```text
-config/uuid-config.json
-```
-
-默认配置：
+The file `config/uuid-config.json` is created on first launch:
 
 ```json
 {
@@ -137,64 +84,61 @@ config/uuid-config.json
 }
 ```
 
-### 权限等级
+Permission levels are `0` (everyone), `1` (moderators), `2` (gamemasters), `3` (admins), and `4` (owners/full OP). Keep the default level `4` unless you fully understand the risk of allowing save-file replacement.
 
-Minecraft 1.21.11 权限等级：
+## Backups
 
-| 值 | 含义 |
-|---:|---|
-| 0 | 所有人 |
-| 1 | moderators |
-| 2 | gamemasters |
-| 3 | admins |
-| 4 | owners / 最高 OP |
-
-建议保持默认 `4`。这个模组会直接覆盖玩家存档，权限不应下放给普通玩家。
-
-## 备份
-
-如果 `backupBeforeOverwrite=true`，覆盖前会自动备份源玩家原始数据。
-
-备份目录：
+With `backupBeforeOverwrite=true`, the source player's original files are backed up before replacement:
 
 ```text
-<world>/uuid_backups/<时间>_source-<sourceUuid>_from-<targetUuid>/
+<world>/uuid_backups/<timestamp>_source-<sourceUuid>_from-<targetUuid>/
 ```
 
-备份内容：
+## Build
 
-```text
-playerdata/<sourceUuid>.dat
-stats/<sourceUuid>.json
-advancements/<sourceUuid>.json
-README.txt
-```
-
-## 构建
-
-在项目根目录执行：
+Build every supported version with Java 25:
 
 ```bash
-./gradlew build
+./gradlew buildAll
 ```
 
-Windows：
+Windows:
 
 ```bat
-gradlew.bat build
+gradlew.bat buildAll
 ```
 
-构建产物在：
+Build only one target, for example:
+
+```bash
+./gradlew :fabric-26.1.2:build
+```
+
+Each jar is generated under its module's `build/libs/` directory. Do not use a jar with a different Minecraft version.
+
+### Automated GitHub builds
+
+GitHub Actions builds all supported versions on every push to `master`, for pull requests, on manual dispatch, and every Sunday at 00:00 UTC. Every run uploads the jars as a workflow artifact for 30 days. Scheduled and manually dispatched runs also refresh the rolling [`automated-build`](https://github.com/Bihrys/UUID/releases/tag/automated-build) prerelease.
+
+## Project structure
 
 ```text
-build/libs/
+uuid-mod/
+├─ common/             Shared player-data file operations and data models
+├─ fabric-1.21.11/     Yarn-based Minecraft 1.21.11 implementation
+├─ fabric-26.1/        Minecraft 26.1 implementation
+├─ fabric-26.1.1/      Minecraft 26.1.1 implementation
+├─ fabric-26.1.2/      Minecraft 26.1.2 implementation
+├─ fabric-26.2/        Minecraft 26.2 implementation
+└─ settings.gradle     Multi-module definition
 ```
 
-把生成的 jar 放入客户端或服务端的 `mods` 文件夹。
+Minecraft/Fabric API integration remains version-specific, while reusable file replacement, backup logic, and player information models live in `common`.
 
-## 使用建议
+## Safety
 
-1. 在正式世界使用前，先复制一份世界存档测试。
-2. 保持 `backupBeforeOverwrite=true`。
-3. 如果要替换在线玩家，执行后让玩家按提示重新进入世界。
-4. 宠物自动转移只处理已加载实体；未加载区块中的宠物需加载后用红石粉右键功能处理。
+Always test on a copy of the world and keep `backupBeforeOverwrite=true`. Save-data replacement is destructive if backups are disabled.
+
+## License
+
+All rights reserved. See [LICENSE.txt](LICENSE.txt).

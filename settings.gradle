@@ -4,8 +4,16 @@ pluginManagement {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
+        mavenCentral()
         gradlePluginPortal()
     }
 }
 
-rootProject.name = 'uuid'
+rootProject.name = 'uuid-mod'
+
+include 'common'
+include 'fabric-1.21.11'
+include 'fabric-26.1'
+include 'fabric-26.1.1'
+include 'fabric-26.1.2'
+include 'fabric-26.2'
