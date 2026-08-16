@@ -118,7 +118,7 @@ Each jar is generated under its module's `build/libs/` directory. Do not use a j
 
 ### Automated GitHub builds
 
-GitHub Actions builds all supported versions on every push to `master`, for pull requests, on manual dispatch, and every Sunday at 00:00 UTC. Every run uploads the jars as a workflow artifact for 30 days. Scheduled and manually dispatched runs also refresh the rolling [`automated-build`](https://github.com/Bihrys/UUID/releases/tag/automated-build) prerelease.
+GitHub Actions builds all supported versions on every push to `master`, for pull requests, on manual dispatch, and every Sunday at 00:00 UTC. Every run uploads the jars as a workflow artifact for 30 days. Pushes to `master`, scheduled builds, and manually dispatched runs also refresh the rolling [`automated-build`](https://github.com/Bihrys/UUID/releases/tag/automated-build) prerelease.
 
 ## Project structure
 

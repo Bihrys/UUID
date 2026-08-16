@@ -118,7 +118,7 @@ gradlew.bat buildAll
 
 ### GitHub 自动构建
 
-GitHub Actions 会在每次推送到 `master`、提交 Pull Request、手动触发以及每周日 UTC 00:00（北京时间 08:00）时构建全部支持版本。每次运行都会把 Jar 作为 Actions Artifact 保留 30 天；定时和手动运行还会更新滚动的 [`automated-build`](https://github.com/Bihrys/UUID/releases/tag/automated-build) 预发布页面。
+GitHub Actions 会在每次推送到 `master`、提交 Pull Request、手动触发以及每周日 UTC 00:00（北京时间 08:00）时构建全部支持版本。每次运行都会把 Jar 作为 Actions Artifact 保留 30 天；推送到 `master`、定时构建和手动运行还会更新滚动的 [`automated-build`](https://github.com/Bihrys/UUID/releases/tag/automated-build) 预发布页面。
 
 ## 项目结构
 
