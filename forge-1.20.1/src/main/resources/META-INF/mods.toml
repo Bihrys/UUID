@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="uuid"
+version="${mod_version}"
+displayName="UUID Swap"
+authors="Bihrys"
+description='''
+Swap Minecraft player save data by UUID and reassign tameable pet ownership from an in-game player-head GUI.
+'''
+
+[[dependencies.uuid]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.uuid]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"

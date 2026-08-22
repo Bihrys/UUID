@@ -4,7 +4,7 @@
 
 [![Build all Minecraft versions](https://github.com/Bihrys/UUID/actions/workflows/build.yml/badge.svg)](https://github.com/Bihrys/UUID/actions/workflows/build.yml)
 
-UUID Swap is a Fabric mod that replaces Minecraft player save data by UUID and provides an in-game GUI for transferring ownership of tamed pets.
+UUID Swap replaces Minecraft player save data by UUID. Fabric and Forge modules share the common file-transfer logic.
 
 ## Compatibility
 
@@ -15,6 +15,7 @@ UUID Swap is a Fabric mod that replaces Minecraft player save data by UUID and p
 | `26.1.1` | 25+ | `fabric-26.1.1` |
 | `26.1.2` | 25+ | `fabric-26.1.2` |
 | `26.2` | 25+ | `fabric-26.2` |
+| `1.20.1` | 17+ | `forge-1.20.1` (Forge 47.4.23) |
 
 All builds use Fabric Loader `0.19.3` or newer and Mod ID `uuid`. Minecraft 26.x uses the new unobfuscated development setup.
 
@@ -102,6 +103,8 @@ Build every supported version with Java 25:
 ./gradlew buildAll
 ```
 
+Forge 1.20.1 is an independent ForgeGradle project and uses Java 17: `cd forge-1.20.1 && ./gradlew build`.
+
 Windows:
 
 ```bat
@@ -117,6 +120,8 @@ Build only one target, for example:
 Each jar is generated under its module's `build/libs/` directory. Do not use a jar with a different Minecraft version.
 
 ### Automated GitHub builds
+
+GitHub Actions builds Fabric and Forge on pushes, pull requests, manual runs, and every Sunday. Download the rolling prerelease from [automated-build](https://github.com/Bihrys/UUID/releases/tag/automated-build).
 
 GitHub Actions builds all supported versions on every push to `master`, for pull requests, on manual dispatch, and every Sunday at 00:00 UTC. Every run uploads the jars as a workflow artifact for 30 days. Pushes to `master`, scheduled builds, and manually dispatched runs also refresh the rolling [`automated-build`](https://github.com/Bihrys/UUID/releases/tag/automated-build) prerelease.
 

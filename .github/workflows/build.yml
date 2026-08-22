@@ -43,11 +43,24 @@ jobs:
       - name: Build all jars
         run: ./gradlew buildAll --console=plain --stacktrace
 
+      - name: Set up Java 17 for Forge
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Build Forge 1.20.1 jar
+        shell: bash
+        working-directory: forge-1.20.1
+        run: |
+          chmod +x gradlew
+          ./gradlew build --console=plain --stacktrace
+
       - name: Collect release jars
         shell: bash
         run: |
           mkdir -p dist
-          find fabric-* -path '*/build/libs/*.jar' ! -name '*-sources.jar' -exec cp {} dist/ \;
+          find fabric-* forge-1.20.1 -path '*/build/libs/*.jar' ! -name '*-sources.jar' -exec cp {} dist/ \;
           sha256sum dist/*.jar > dist/SHA256SUMS.txt
           ls -lh dist
 
@@ -75,7 +88,7 @@ jobs:
           tag_name: automated-build
           name: Automated multi-version build
           body: |
-            Automatically built Fabric jars for every supported Minecraft version.
+            Automatically built Fabric and Forge jars for every supported Minecraft version.
 
             This rolling prerelease is refreshed after pushes to master, scheduled builds, and manual runs.
           prerelease: true

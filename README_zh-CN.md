@@ -4,7 +4,7 @@
 
 [![构建所有 Minecraft 版本](https://github.com/Bihrys/UUID/actions/workflows/build.yml/badge.svg)](https://github.com/Bihrys/UUID/actions/workflows/build.yml)
 
-UUID Swap 是一个 Fabric 模组，可以按照 UUID 替换 Minecraft 玩家存档数据，并通过游戏内 GUI 转移驯服宠物的主人。
+UUID Swap 可以按照 UUID 替换 Minecraft 玩家存档数据。Fabric 与 Forge 模块共享跨版本的文件交换逻辑。
 
 ## 兼容性
 
@@ -15,8 +15,9 @@ UUID Swap 是一个 Fabric 模组，可以按照 UUID 替换 Minecraft 玩家存
 | `26.1.1` | 25+ | `fabric-26.1.1` |
 | `26.1.2` | 25+ | `fabric-26.1.2` |
 | `26.2` | 25+ | `fabric-26.2` |
+| `1.20.1` | 17+ | `forge-1.20.1`（Forge 47.4.23） |
 
-所有版本使用 Fabric Loader `0.19.3` 或更高版本，Mod ID 为 `uuid`。Minecraft 26.x 使用新的未混淆开发环境。
+Fabric 版本使用 Fabric Loader `0.19.3` 或更高版本；Forge 版本使用 Forge 47.4.23。Mod ID 均为 `uuid`。
 
 ## 功能
 
