@@ -146,4 +146,6 @@ Always test on a copy of the world and keep `backupBeforeOverwrite=true`. Save-d
 
 ## License
 
-All rights reserved. See [LICENSE.txt](LICENSE.txt).
+MIT License. See [LICENSE.txt](LICENSE.txt).
+
+You are free to view, modify, and redistribute this project (including modified versions), as long as the copyright notice above is preserved and **Bihrys** is credited as the original author.

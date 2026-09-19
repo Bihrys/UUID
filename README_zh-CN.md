@@ -142,4 +142,6 @@ Minecraft/Fabric API 接入代码保留在各版本模块中，可复用的文�
 
 ## 许可证
 
-保留所有权利。详见 [LICENSE.txt](LICENSE.txt)。
+MIT 许可证。详见 [LICENSE.txt](LICENSE.txt)。
+
+任何人都可以查看、修改并再次发布本项目（包括修改后的版本），但必须保留原始版权声明，并标注 **Bihrys** 为原作者。
