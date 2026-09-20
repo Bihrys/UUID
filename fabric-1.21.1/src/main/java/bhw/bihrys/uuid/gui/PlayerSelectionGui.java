@@ -1,7 +1,7 @@
 package bhw.bihrys.uuid.gui;
 
 import bhw.bihrys.uuid.player.PlayerInfo;
-import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.ProfileComponent;
@@ -20,6 +20,7 @@ import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public final class PlayerSelectionGui {
@@ -38,6 +39,30 @@ public final class PlayerSelectionGui {
                 (syncId, playerInventory, ignored) -> new Handler(syncId, playerInventory, players, onSelect),
                 title
         ));
+    }
+
+    /**
+     * The packet codec encodes the profile name with a 16-character limit. Offline players
+     * missing from the user cache fall back to their 36-character UUID string as display name,
+     * which must not be used as a profile name, or encoding the container packet fails and the
+     * viewing player is disconnected.
+     */
+    private static ProfileComponent createProfile(PlayerInfo info) {
+        String name = isValidPlayerName(info.name()) ? info.name() : null;
+        return new ProfileComponent(Optional.ofNullable(name), Optional.of(info.uuid()), new PropertyMap());
+    }
+
+    private static boolean isValidPlayerName(String name) {
+        if (name == null || name.isEmpty() || name.length() > 16) {
+            return false;
+        }
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (!(c == '_' || (c < 128 && Character.isLetterOrDigit(c)))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static final class Handler extends GenericContainerScreenHandler {
@@ -117,7 +142,7 @@ public final class PlayerSelectionGui {
 
         private ItemStack playerHead(PlayerInfo info) {
             ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
-            stack.set(DataComponentTypes.PROFILE, new ProfileComponent(new GameProfile(info.uuid(), info.name())));
+            stack.set(DataComponentTypes.PROFILE, createProfile(info));
             stack.set(DataComponentTypes.CUSTOM_NAME,
                     Text.literal(info.name()).formatted(info.online() ? Formatting.GREEN : Formatting.GOLD));
 
