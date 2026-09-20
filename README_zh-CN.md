@@ -10,6 +10,7 @@ UUID Swap 可以按照 UUID 替换 Minecraft 玩家存档数据。Fabric 与 For
 
 | Minecraft | Java | 模块 |
 |---|---:|---|
+| `1.21.1` | 21+ | `fabric-1.21.1` |
 | `1.21.11` | 21+ | `fabric-1.21.11` |
 | `26.1` | 25+ | `fabric-26.1` |
 | `26.1.1` | 25+ | `fabric-26.1.1` |
@@ -126,6 +127,7 @@ GitHub Actions 会在每次推送到 `master`、提交 Pull Request、手动触�
 ```text
 uuid-mod/
 ├─ common/             公共玩家数据文件操作和数据模型
+├─ fabric-1.21.1/      使用 Yarn 的 Minecraft 1.21.1 实现
 ├─ fabric-1.21.11/     使用 Yarn 的 Minecraft 1.21.11 实现
 ├─ fabric-26.1/        Minecraft 26.1 实现
 ├─ fabric-26.1.1/      Minecraft 26.1.1 实现

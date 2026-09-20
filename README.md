@@ -10,6 +10,7 @@ UUID Swap replaces Minecraft player save data by UUID. Fabric and Forge modules 
 
 | Minecraft | Java | Module |
 |---|---:|---|
+| `1.21.1` | 21+ | `fabric-1.21.1` |
 | `1.21.11` | 21+ | `fabric-1.21.11` |
 | `26.1` | 25+ | `fabric-26.1` |
 | `26.1.1` | 25+ | `fabric-26.1.1` |
@@ -130,6 +131,7 @@ GitHub Actions builds all supported versions on every push to `master`, for pull
 ```text
 uuid-mod/
 ├─ common/             Shared player-data file operations and data models
+├─ fabric-1.21.1/      Yarn-based Minecraft 1.21.1 implementation
 ├─ fabric-1.21.11/     Yarn-based Minecraft 1.21.11 implementation
 ├─ fabric-26.1/        Minecraft 26.1 implementation
 ├─ fabric-26.1.1/      Minecraft 26.1.1 implementation
