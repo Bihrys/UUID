@@ -8,6 +8,7 @@ tasks.register('buildAll') {
     description = 'Build every supported Minecraft version.'
     dependsOn(
             ':common:build',
+            ':fabric-1.21.1:build',
             ':fabric-1.21.11:build',
             ':fabric-26.1:build',
             ':fabric-26.1.1:build',
