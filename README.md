@@ -9,16 +9,33 @@ UUID Swap replaces Minecraft player save data by UUID. Fabric and Forge modules 
 ## Compatibility
 
 | Minecraft | Java | Module |
-|---|---:|---|
+| --- | ---: | --- |
+| `1.20` | 17+ | `fabric-1.20` |
+| `1.20.1` | 17+ | `forge-1.20.1` (Forge 47.4.23) |
+| `1.20.2` | 17+ | `fabric-1.20.2` |
+| `1.20.3` | 17+ | `fabric-1.20.3` |
+| `1.20.4` | 17+ | `fabric-1.20.4` |
+| `1.20.5` | 21+ | `fabric-1.20.5` |
+| `1.20.6` | 21+ | `fabric-1.20.6` |
+| `1.21` | 21+ | `fabric-1.21` |
 | `1.21.1` | 21+ | `fabric-1.21.1` |
+| `1.21.2` | 21+ | `fabric-1.21.2` |
+| `1.21.3` | 21+ | `fabric-1.21.3` |
+| `1.21.4` | 21+ | `fabric-1.21.4` |
+| `1.21.5` | 21+ | `fabric-1.21.5` |
+| `1.21.6` | 21+ | `fabric-1.21.6` |
+| `1.21.7` | 21+ | `fabric-1.21.7` |
+| `1.21.8` | 21+ | `fabric-1.21.8` |
+| `1.21.9` | 21+ | `fabric-1.21.9` |
+| `1.21.10` | 21+ | `fabric-1.21.10` |
 | `1.21.11` | 21+ | `fabric-1.21.11` |
 | `26.1` | 25+ | `fabric-26.1` |
 | `26.1.1` | 25+ | `fabric-26.1.1` |
 | `26.1.2` | 25+ | `fabric-26.1.2` |
 | `26.2` | 25+ | `fabric-26.2` |
-| `1.20.1` | 17+ | `forge-1.20.1` (Forge 47.4.23) |
+| `26.3` | 25+ | `fabric-26.3` |
 
-All builds use Fabric Loader `0.19.3` or newer and Mod ID `uuid`. Minecraft 26.x uses the new unobfuscated development setup.
+All builds use Mod ID `uuid`. Fabric modules for Minecraft 1.20–1.20.4 use Fabric Loader `0.16.14` or newer (Java 17); newer Minecraft versions use Fabric Loader `0.19.3` or newer. Minecraft 26.x uses the new unobfuscated development setup.
 
 ## Features
 
@@ -131,12 +148,10 @@ GitHub Actions builds all supported versions on every push to `master`, for pull
 ```text
 uuid-mod/
 ├─ common/             Shared player-data file operations and data models
-├─ fabric-1.21.1/      Yarn-based Minecraft 1.21.1 implementation
-├─ fabric-1.21.11/     Yarn-based Minecraft 1.21.11 implementation
-├─ fabric-26.1/        Minecraft 26.1 implementation
-├─ fabric-26.1.1/      Minecraft 26.1.1 implementation
-├─ fabric-26.1.2/      Minecraft 26.1.2 implementation
-├─ fabric-26.2/        Minecraft 26.2 implementation
+├─ fabric-1.20*/       Yarn-based implementations for Minecraft 1.20–1.20.4 (Java 17, NBT items)
+├─ fabric-1.20.5*/     Yarn-based implementations for Minecraft 1.20.5–1.21.11 (Java 21, item components)
+├─ fabric-26.*/        Unobfuscated implementations for Minecraft 26.1–26.3 (Java 25)
+├─ forge-1.20.1/       Independent ForgeGradle project for Minecraft 1.20.1
 └─ settings.gradle     Multi-module definition
 ```
 

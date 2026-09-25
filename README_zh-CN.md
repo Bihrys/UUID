@@ -9,16 +9,33 @@ UUID Swap 可以按照 UUID 替换 Minecraft 玩家存档数据。Fabric 与 For
 ## 兼容性
 
 | Minecraft | Java | 模块 |
-|---|---:|---|
+| --- | ---: | --- |
+| `1.20` | 17+ | `fabric-1.20` |
+| `1.20.1` | 17+ | `forge-1.20.1`（Forge 47.4.23） |
+| `1.20.2` | 17+ | `fabric-1.20.2` |
+| `1.20.3` | 17+ | `fabric-1.20.3` |
+| `1.20.4` | 17+ | `fabric-1.20.4` |
+| `1.20.5` | 21+ | `fabric-1.20.5` |
+| `1.20.6` | 21+ | `fabric-1.20.6` |
+| `1.21` | 21+ | `fabric-1.21` |
 | `1.21.1` | 21+ | `fabric-1.21.1` |
+| `1.21.2` | 21+ | `fabric-1.21.2` |
+| `1.21.3` | 21+ | `fabric-1.21.3` |
+| `1.21.4` | 21+ | `fabric-1.21.4` |
+| `1.21.5` | 21+ | `fabric-1.21.5` |
+| `1.21.6` | 21+ | `fabric-1.21.6` |
+| `1.21.7` | 21+ | `fabric-1.21.7` |
+| `1.21.8` | 21+ | `fabric-1.21.8` |
+| `1.21.9` | 21+ | `fabric-1.21.9` |
+| `1.21.10` | 21+ | `fabric-1.21.10` |
 | `1.21.11` | 21+ | `fabric-1.21.11` |
 | `26.1` | 25+ | `fabric-26.1` |
 | `26.1.1` | 25+ | `fabric-26.1.1` |
 | `26.1.2` | 25+ | `fabric-26.1.2` |
 | `26.2` | 25+ | `fabric-26.2` |
-| `1.20.1` | 17+ | `forge-1.20.1`（Forge 47.4.23） |
+| `26.3` | 25+ | `fabric-26.3` |
 
-Fabric 版本使用 Fabric Loader `0.19.3` 或更高版本；Forge 版本使用 Forge 47.4.23。Mod ID 均为 `uuid`。
+Mod ID 均为 `uuid`。Minecraft 1.20–1.20.4 的 Fabric 模块使用 Fabric Loader `0.16.14` 或更高版本（Java 17）；更新版本的模块使用 Fabric Loader `0.19.3` 或更高版本。Forge 1.20.1 使用 Forge 47.4.23。Minecraft 26.x 使用新的无混淆开发环境。
 
 ## 功能
 
@@ -127,12 +144,10 @@ GitHub Actions 会在每次推送到 `master`、提交 Pull Request、手动触�
 ```text
 uuid-mod/
 ├─ common/             公共玩家数据文件操作和数据模型
-├─ fabric-1.21.1/      使用 Yarn 的 Minecraft 1.21.1 实现
-├─ fabric-1.21.11/     使用 Yarn 的 Minecraft 1.21.11 实现
-├─ fabric-26.1/        Minecraft 26.1 实现
-├─ fabric-26.1.1/      Minecraft 26.1.1 实现
-├─ fabric-26.1.2/      Minecraft 26.1.2 实现
-├─ fabric-26.2/        Minecraft 26.2 实现
+├─ fabric-1.20*/       使用 Yarn 的 Minecraft 1.20–1.20.4 实现（Java 17，NBT 物品）
+├─ fabric-1.20.5*/     使用 Yarn 的 Minecraft 1.20.5–1.21.11 实现（Java 21，物品组件）
+├─ fabric-26.*/        Minecraft 26.1–26.3 无混淆实现（Java 25）
+├─ forge-1.20.1/       Minecraft 1.20.1 的独立 ForgeGradle 项目
 └─ settings.gradle     多模块定义
 ```
 

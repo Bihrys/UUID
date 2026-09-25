@@ -22,3 +22,9 @@ run
 
 # Local AI/editor metadata
 .claude/
+
+# VSCode/Eclipse output
+bin/
+
+# Build logs
+*.log

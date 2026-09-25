@@ -1,0 +1,63 @@
+plugins {
+    id 'fabric-loom' version '1.17-SNAPSHOT'
+}
+
+def minecraftVersion = '1.21.5'
+def yarnVersion = '1.21.5+build.1'
+def loaderVersion = '0.19.3'
+def fabricApiVersion = '0.128.2+1.21.5'
+
+version = "1.0.0+${minecraftVersion}"
+
+base {
+    archivesName = "uuid-fabric-${minecraftVersion}"
+}
+
+sourceSets.main.java.srcDir project(':common').file('src/main/java')
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        uuid {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    mappings "net.fabricmc:yarn:${yarnVersion}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${loaderVersion}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft_version', minecraftVersion
+    inputs.property 'loader_version', loaderVersion
+
+    filesMatching('fabric.mod.json') {
+        expand version: project.version,
+                minecraft_version: minecraftVersion,
+                loader_version: loaderVersion
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+java {
+    // Use the CI JDK while keeping Minecraft 1.21.5 bytecode compatible with Java 21.
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+
+jar {
+    from(rootProject.file('LICENSE.txt')) {
+        rename { "${it}_uuid" }
+    }
+}

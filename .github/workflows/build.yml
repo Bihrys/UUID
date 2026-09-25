@@ -2,96 +2,89 @@ name: Build all Minecraft versions
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
   workflow_dispatch:
   schedule:
-    # Every Sunday at 00:00 UTC / 08:00 China Standard Time.
-    - cron: "0 0 * * 0"
-
-concurrency:
-  group: uuid-build-${{ github.ref }}
-  cancel-in-progress: true
+    # Every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build every supported version
+  fabric:
+    name: Fabric (all versions)
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java 25
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: '25'
 
-      - name: Set up Gradle cache
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
+      - name: Build all Fabric modules
+        run: ./gradlew buildAll --continue --stacktrace
 
-      - name: Build all jars
-        run: ./gradlew buildAll --console=plain --stacktrace
+      - name: Upload Fabric jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-jars
+          path: |
+            fabric-*/build/libs/*.jar
+            !fabric-*/build/libs/*-sources.jar
+          retention-days: 30
 
-      - name: Set up Java 17 for Forge
+  forge:
+    name: Forge 1.20.1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
 
-      - name: Build Forge 1.20.1 jar
-        shell: bash
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Forge 1.20.1
         working-directory: forge-1.20.1
-        run: |
-          chmod +x gradlew
-          ./gradlew build --console=plain --stacktrace
+        run: ./gradlew build --stacktrace
 
-      - name: Collect release jars
-        shell: bash
-        run: |
-          mkdir -p dist
-          find fabric-* forge-1.20.1 -path '*/build/libs/*.jar' ! -name '*-sources.jar' -exec cp {} dist/ \;
-          sha256sum dist/*.jar > dist/SHA256SUMS.txt
-          ls -lh dist
-
-      - name: Upload workflow artifacts
+      - name: Upload Forge jar
         uses: actions/upload-artifact@v4
         with:
-          name: uuid-all-minecraft-versions-${{ github.run_number }}
-          path: dist/
-          if-no-files-found: error
+          name: forge-jars
+          path: |
+            forge-1.20.1/build/libs/*.jar
+            !forge-1.20.1/build/libs/*-sources.jar
           retention-days: 30
 
-      - name: Move rolling automated-build tag
-        if: github.event_name != 'pull_request'
-        shell: bash
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git tag -f automated-build "$GITHUB_SHA"
-          git push origin refs/tags/automated-build --force
+  prerelease:
+    name: Rolling prerelease
+    if: github.event_name != 'pull_request'
+    needs: [ fabric, forge ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download jars
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-jars'
+          path: jars
 
-      - name: Publish rolling automated build
-        if: github.event_name != 'pull_request'
+      - name: Update automated-build prerelease
         uses: softprops/action-gh-release@v2
         with:
           tag_name: automated-build
-          name: Automated multi-version build
-          body: |
-            Automatically built Fabric and Forge jars for every supported Minecraft version.
-
-            This rolling prerelease is refreshed after pushes to master, scheduled builds, and manual runs.
+          name: Automated build
           prerelease: true
-          make_latest: false
-          overwrite_files: true
-          files: dist/*
+          files: jars/**/*.jar
